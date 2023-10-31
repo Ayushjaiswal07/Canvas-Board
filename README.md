@@ -1,6 +1,6 @@
 # Please read the 'prerequisite.docx' before cloning the project.
 
-<h3>Run all the command and install needed packages that are bold</h3>
+<h2>Run all the command and install needed packages that are bold ind 'prerequisits.dox'</h2>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
