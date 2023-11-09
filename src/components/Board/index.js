@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect} from "react";
 import { useSelector, useDispatch } from 'react-redux';
 
 const Board = () => {
@@ -20,7 +20,7 @@ const Board = () => {
         changeConfig()
     }, [color, size])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!canvasRef.current) return
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d')
