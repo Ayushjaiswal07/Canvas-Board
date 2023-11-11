@@ -8,7 +8,7 @@ const initialState = {
     },
 
     [MENU_ITEMS.ERASER]: {
-        color: COLORS.BLACK,
+        color: COLORS.WHITE,
         size: 3
     },
 
