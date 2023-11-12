@@ -2,11 +2,13 @@ import { useEffect, useRef, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 
 import { MENU_ITEMS } from "@/constants";
-import { menuItemClick, actionItemClick } from "@/slice/menuSlice";
+import { actionItemClick } from "@/slice/menuSlice";
 
 const Board = () => {
     const dispatch = useDispatch()
     const canvasRef = useRef(null);
+    const drawHistory = useRef([]);
+    const historyPointer = useRef(0);
     const shouldDraw = useRef(false);
     const {activeMenuItem, actionMenuItem} = useSelector((state)=> state.menu);
     const {color, size} = useSelector((state)=> state.toolbox[activeMenuItem]);
@@ -17,17 +19,22 @@ const Board = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d')
 
-        if (actionMenuItem === MENU_ITEMS.DOWNLOAD) {
+        if (actionMenuItem === MENU_ITEMS.DOWNLOAD) { // Logic for Download
             const URL = canvas.toDataURL()
             const anchor = document.createElement('a')
             anchor.href = URL
             anchor.download = 'sketch.jpg'
             anchor.click()
-            console.log(URL)
+            
+        } else  if (actionMenuItem === MENU_ITEMS.UNDO || actionMenuItem === MENU_ITEMS.REDO) {
+            if(historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO) historyPointer.current -= 1
+            if(historyPointer.current < drawHistory.current.length - 1 && actionMenuItem === MENU_ITEMS.REDO) historyPointer.current += 1
+            const imageData = drawHistory.current[historyPointer.current]
+            context.putImageData(imageData, 0, 0)
         }
 
         dispatch(actionItemClick(null))
-        console.log( "actionMenuItem", actionMenuItem)
+        
     }, [actionMenuItem, dispatch])
 
     useEffect(() => {
@@ -75,6 +82,9 @@ const Board = () => {
 
         const handleMouseUp = (e) => {
             shouldDraw.current = false
+            const imageData = context.getImageData(0,0, canvas.width ,canvas.height)
+            drawHistory.current.push(imageData)
+            historyPointer.current = drawHistory.current.length -1 
         }
 
         canvas.addEventListener( 'mousedown', handleMouseDown)
