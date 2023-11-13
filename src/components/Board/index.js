@@ -44,12 +44,21 @@ const Board = () => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d')
 
-        const changeConfig = () => {
+        const changeConfig = (color, size) => {
             context.strokeStyle = color
             context.lineWidth = size
         }
 
-        changeConfig()
+        const handleChangeConfig = (config) =>{
+            changeConfig(config.color, config.size)
+        }
+
+        changeConfig(color, size)
+        socket.on('changeConfig', handleChangeConfig)
+
+        return () => {
+            socket.off('changeConfig', handleChangeConfig)
+        }
     }, [color, size])
 
     // Before Browser Start Painting
@@ -75,11 +84,13 @@ const Board = () => {
         const handleMouseDown = (e) => {
             shouldDraw.current = true
             beginPath(e.clientX, e.clientY)
+            socket.emit('beginPath', {x: e.clientX, y: e.clientY})
         }
 
         const handleMouseMove = (e) => {
             if(!shouldDraw.current) return
             drawLine(e.clientX, e.clientY)
+            socket.emit('drawLine', {x: e.clientX, y: e.clientY})
         }
 
         const handleMouseUp = (e) => {
@@ -89,13 +100,20 @@ const Board = () => {
             historyPointer.current = drawHistory.current.length -1 
         }
 
+        const handleBeginPath = (path) =>{
+            beginPath(path.x, path.y)
+        }
+
+        const handleDrawLine = (path) =>{
+            drawLine(path.x, path.y)
+        }
+
         canvas.addEventListener( 'mousedown', handleMouseDown)
         canvas.addEventListener( 'mousemove', handleMouseMove)
         canvas.addEventListener( 'mouseup', handleMouseUp)
 
-        socket.on("connect", () => {
-            console.log("client connected"); // x8WIv7-mJelg7on_ALbx
-          });
+        socket.on('beginPath', handleBeginPath)
+        socket.on('drawLine', handleDrawLine)
 
         return () => {
             
@@ -103,6 +121,8 @@ const Board = () => {
             canvas.removeEventListener( 'mousemove', handleMouseMove)
             canvas.removeEventListener( 'mouseup', handleMouseUp)
 
+            socket.off('beginPath', handleBeginPath)
+            socket.off('drawLine', handleDrawLine)
         }
 
     }, [])
